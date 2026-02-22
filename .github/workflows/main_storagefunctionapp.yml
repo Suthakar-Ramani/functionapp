@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy dotnet core project to Azure Function App - storagefunctionapp
+name: Build and deploy .NET 8 Azure Function App - storagefunctionapp
 
 on:
   push:
@@ -10,44 +7,51 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '8.0' # set this to the dotnet version to use
+  DOTNET_VERSION: '8.0'
+  PROJECT_FILE: 'MyBlobFunctionProj.csproj'
+  PUBLISH_DIR: './publish'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 'Resolve Project Dependencies Using Dotnet'
-        shell: bash
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.PROJECT_FILE }}
+
+      - name: Build project
+        run: dotnet build ${{ env.PROJECT_FILE }} --configuration Release --no-restore
+
+      - name: Publish project
+        run: dotnet publish ${{ env.PROJECT_FILE }} --configuration Release --output ${{ env.PUBLISH_DIR }}
+
+      - name: Zip publish output
         run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
-          popd
-      
+          cd ${{ env.PUBLISH_DIR }}
+          zip -r ../functionapp.zip .
+          cd ..
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A3B4C687301D41D0877A49F190A4091A }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4E18B204753A4ED98A0A7075E20CAF47 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4911DB1F939E4690A04B6260CAA23753 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      - name: 'Run Azure Functions Action'
+      - name: Deploy to Azure Function App
         uses: Azure/functions-action@v1
-        id: fa
         with:
           app-name: 'storagefunctionapp'
           slot-name: 'Production'
-          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
+          package: 'functionapp.zip'
