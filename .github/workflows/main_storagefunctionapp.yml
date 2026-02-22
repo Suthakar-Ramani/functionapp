@@ -39,8 +39,11 @@ jobs:
       - name: Verify publish output
         run: ls -R ${{ env.PUBLISH_DIR }}
 
-      - name: Zip publish output (Flex requires .azurefunctions at root)
-        run: zip -r functionapp.zip .azurefunctions
+      - name: Zip publish output (contents of .azurefunctions)
+        run: |
+          cd ${{ env.PUBLISH_DIR }}
+          zip -r ../functionapp.zip .
+          cd ..
 
       - name: Login to Azure
         uses: azure/login@v2
