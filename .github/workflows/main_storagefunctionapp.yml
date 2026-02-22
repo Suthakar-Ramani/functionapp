@@ -47,9 +47,11 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy with Azure CLI
-        run: |
-          az functionapp deployment source config-zip \
-            --name storagefunctionapp \
-            --resource-group rg-function-app \
-            --src functionapp.zip
+      - name: Deploy to Azure Function App (Flex)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'storagefunctionapp'
+          slot-name: 'Production'
+          package: 'functionapp.zip'
+          app-type: functionapp
+          sku: flex
