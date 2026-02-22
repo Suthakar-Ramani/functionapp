@@ -47,9 +47,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to Azure Function App
-        uses: Azure/functions-action@v1
-        with:
-          app-name: 'storagefunctionapp'
-          slot-name: 'Production'
-          package: 'functionapp.zip'
+      - name: Deploy with Azure CLI
+        run: |
+          az functionapp deployment source config-zip \
+            --name storagefunctionapp \
+            --resource-group rg-function-app \
+            --src functionapp.zip
