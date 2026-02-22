@@ -36,6 +36,9 @@ jobs:
       - name: Publish project
         run: dotnet publish ${{ env.PROJECT_FILE }} --configuration Release --output ${{ env.PUBLISH_DIR }}
 
+      - name: Verify publish output
+        run: ls -R ${{ env.PUBLISH_DIR }}
+
       - name: Zip publish output (Flex requires .azurefunctions at root)
         run: zip -r functionapp.zip .azurefunctions
 
