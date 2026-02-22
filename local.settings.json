@@ -1,8 +1,8 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "StorageConnection": "DefaultEndpointsProtocol=https;AccountName=<yourstorage>;..."
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "StorageConnection": "ResourceId=/subscriptions/65b56bf4-807e-498e-8a5b-fc9d8f3662fb/resourceGroups/rg-function-app/providers/Microsoft.Storage/storageAccounts/rgfunctionapp9843"
   }
 }
