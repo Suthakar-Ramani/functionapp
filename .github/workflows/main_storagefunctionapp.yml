@@ -9,7 +9,7 @@ on:
 env:
   DOTNET_VERSION: '8.0'
   PROJECT_FILE: 'MyBlobFunctionProj.csproj'
-  PUBLISH_DIR: './publish'
+  PUBLISH_DIR: '.azurefunctions'
 
 jobs:
   build-and-deploy:
@@ -36,11 +36,8 @@ jobs:
       - name: Publish project
         run: dotnet publish ${{ env.PROJECT_FILE }} --configuration Release --output ${{ env.PUBLISH_DIR }}
 
-      - name: Zip publish output
-        run: |
-          cd ${{ env.PUBLISH_DIR }}
-          zip -r ../functionapp.zip .
-          cd ..
+      - name: Zip publish output (Flex requires .azurefunctions at root)
+        run: zip -r functionapp.zip .azurefunctions
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -53,5 +50,3 @@ jobs:
           app-name: 'storagefunctionapp'
           slot-name: 'Production'
           package: 'functionapp.zip'
-
-
